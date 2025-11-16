@@ -1,11 +1,22 @@
-from fastapi import APIRouter
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, Depends
+from sqlalchemy.ext.asyncio.session import AsyncSession
 
-from src.expenses.schemas import LLMChatIn
+from src.expenses.service import ExpenseService
+from src.database import Database
+from src.expenses.schemas import ExpenseChatIn
 
-router = APIRouter()
+expense_router = APIRouter()
 
 
-@router.post("/chat")
-async def llm_chat(payload: LLMChatIn):
-    return JSONResponse({"echo": payload.model_dump()})
+@expense_router.post("/create", status_code=200)
+async def create_expense(
+    payload: ExpenseChatIn,
+    session: AsyncSession = Depends(Database.get_async_session),
+    # DEPENDENCY INJECT THE FETCHING OF THE CURRENT USER (JWT-BASED)
+):
+    print(f"payload: {payload}")
+    current_user = {"id": 1}
+    expense_service = ExpenseService(session, current_user["id"])
+    result = await expense_service.agent_expense_insert(payload.message)
+    return {"result": result}
+
