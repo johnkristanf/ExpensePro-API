@@ -20,6 +20,6 @@ class Budget(Base):
 
     created_at = Column(DateTime, default=datetime.now)
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
-    
+
     user = relationship("User", back_populates="budgets")
-    expenses = relationship("Expense", back_populates="budget")
+    expenses = relationship("Expense", back_populates="budgets")
