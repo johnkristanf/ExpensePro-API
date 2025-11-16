@@ -15,7 +15,7 @@ class Expense(Base):
     amount = Column(Float, nullable=False)
     spending_type = Column(Text, nullable=True)
     date_spent = Column(DateTime, nullable=True)
-    
+
     category_id = Column(Integer, ForeignKey("categories.id"), nullable=True)
     budget_id = Column(Integer, ForeignKey("budgets.id"), nullable=True)
     user_id = Column(
@@ -27,5 +27,5 @@ class Expense(Base):
 
     # Relationships
     category = relationship("Category", back_populates="expenses")
-    budget = relationship("Budget", back_populates="expenses")
+    budgets = relationship("Budget", back_populates="expenses")
     user = relationship("User", back_populates="expenses")
