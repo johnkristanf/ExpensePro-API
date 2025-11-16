@@ -11,4 +11,3 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
-print(f"settings.DATABASE_SYNC_DSN: {settings.DATABASE_SYNC_DSN}")
