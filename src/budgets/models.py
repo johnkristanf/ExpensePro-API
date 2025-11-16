@@ -17,7 +17,9 @@ class Budget(Base):
     user_id = Column(
         Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
-    user = relationship("User", back_populates="budgets")
 
     created_at = Column(DateTime, default=datetime.now)
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+    
+    user = relationship("User", back_populates="budgets")
+    expenses = relationship("Expense", back_populates="budget")

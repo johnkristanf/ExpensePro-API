@@ -17,3 +17,4 @@ class Category(Base):
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
 
     user = relationship("User", back_populates="categories")
+    expenses = relationship("Expense", back_populates="category")

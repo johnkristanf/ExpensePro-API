@@ -4,7 +4,6 @@ from datetime import datetime
 from sqlalchemy.orm import relationship
 from src.database import Base
 
-
 from sqlalchemy import ForeignKey
 
 
@@ -16,6 +15,7 @@ class Expense(Base):
     amount = Column(Float, nullable=False)
     spending_type = Column(Text, nullable=True)
     date_spent = Column(DateTime, nullable=True)
+    
     category_id = Column(Integer, ForeignKey("categories.id"), nullable=True)
     budget_id = Column(Integer, ForeignKey("budgets.id"), nullable=True)
     user_id = Column(
