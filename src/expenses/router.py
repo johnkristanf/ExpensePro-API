@@ -14,9 +14,8 @@ async def create_expense(
     session: AsyncSession = Depends(Database.get_async_session),
     # DEPENDENCY INJECT THE FETCHING OF THE CURRENT USER (JWT-BASED)
 ):
-    print(f"payload: {payload}")
-    current_user = {"id": 1}
+    current_user = {"id": 1, "name": "John Kristan"}
+
     expense_service = ExpenseService(session, current_user["id"])
     result = await expense_service.agent_expense_insert(payload.message)
     return {"result": result}
-
