@@ -5,7 +5,7 @@ from sqlalchemy.orm import relationship
 from src.database import Base
 
 from sqlalchemy import ForeignKey
-
+from src.users.models import User
 
 class Expense(Base):
     __tablename__ = "expenses"
@@ -28,4 +28,4 @@ class Expense(Base):
     # Relationships
     category = relationship("Category", back_populates="expenses")
     budgets = relationship("Budget", back_populates="expenses")
-    user = relationship("User", back_populates="expenses")
+    user = relationship(User, back_populates="expenses")
