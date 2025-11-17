@@ -165,7 +165,7 @@ class ExpenseToolFactory:
             Args:
                 description: Description of the expense
                 amount: The monetary amount of the expense
-                spending_type: Type of spending (leisure, necessity, etc.)
+                spending_type: Type of spending (wants, needs, etc.)
                 date_spent: Date in YYYY-MM-DD format, defaults to today
                 category_id: The ID of the category (use get_category_id first)
                 budget_id: The ID of the budget (use get_budget_id first)
