@@ -22,21 +22,19 @@ class ExpenseService:
             model="gpt-4o-mini",
             api_key=settings.OPENAI_API_KEY,
             temperature=0,
-            max_tokens=1500,  # Reduced for faster responses
-            timeout=30,  # Reduced timeout
+            max_tokens=1500, 
+            timeout=30, 
+            streaming=True
         )
-
-        # Get tools with injected dependencies
-        tools = self.tool_factory.expense_create_tools()
 
         agent = create_agent(
             model,
             system_prompt=expense_system_prompt(),
-            tools=tools,
+            tools=self.tool_factory.expense_create_tools(),
             middleware=[self.tool_factory.handle_expense_tool_errors],
         )
-
-        result = await agent.ainvoke(
+        
+        result = await agent.astream_events(
             {"messages": [{"role": "user", "content": user_message}]}
         )
 
