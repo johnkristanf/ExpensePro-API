@@ -28,8 +28,6 @@ class ExpenseToolFactory:
 
     def create_get_category_id_tool(self) -> StructuredTool:
         """Create get_category_id tool with injected dependencies."""
-        repo = self.repository
-        user_id = self.user_id
 
         async def get_category_id(category_name: str) -> dict:
             """Look up the category ID by category name.
@@ -40,7 +38,7 @@ class ExpenseToolFactory:
             Returns:
                 Dictionary with category_id and category_name, or None if not found
             """
-            category = await repo.get_category_by_name(category_name, user_id)
+            category = await self.repository.get_category_by_name(category_name, self.user_id)
 
             if category:
                 return {
@@ -98,8 +96,6 @@ class ExpenseToolFactory:
 
     def create_list_categories_tool(self) -> StructuredTool:
         """Create list_categories tool with injected dependencies."""
-        repo = self.repository
-        user_id = self.user_id
 
         async def list_categories() -> dict:
             """Get all available categories for the current user.
@@ -107,7 +103,7 @@ class ExpenseToolFactory:
             Returns:
                 Dictionary with list of categories
             """
-            categories = await repo.list_categories(user_id)
+            categories = await self.repository.list_categories(self.user_id)
 
             return {
                 "categories": [{"id": cat.id, "name": cat.name} for cat in categories],
@@ -122,8 +118,6 @@ class ExpenseToolFactory:
 
     def create_list_budgets_tool(self) -> StructuredTool:
         """Create list_budgets tool with injected dependencies."""
-        repo = self.repository
-        user_id = self.user_id
 
         async def list_budgets() -> dict:
             """Get all available budgets for the current user.
@@ -131,7 +125,7 @@ class ExpenseToolFactory:
             Returns:
                 Dictionary with list of budgets
             """
-            budgets = await repo.list_budgets(user_id)
+            budgets = await self.repository.list_budgets(self.user_id)
 
             return {
                 "budgets": [
@@ -149,8 +143,6 @@ class ExpenseToolFactory:
 
     def create_create_expense_tool(self) -> StructuredTool:
         """Create create_expense tool with injected dependencies."""
-        repo = self.repository
-        user_id = self.user_id
 
         async def create_expense(
             description: str,
@@ -191,10 +183,10 @@ class ExpenseToolFactory:
                 date_spent=parsed_date or datetime.now(),
                 category_id=category_id,
                 budget_id=budget_id,
-                user_id=user_id,
+                user_id=self.user_id,
             )
 
-            expense = await repo.create_expense(expense_data)
+            expense = await self.repository.create_expense(expense_data)
 
             return {
                 "status": "success",
@@ -217,6 +209,29 @@ class ExpenseToolFactory:
             name="create_expense",
             description="Create a new expense record in the database",
         )
+        
+    def create_list_expenses_tool(self):
+        async def list_expenses():
+            expenses = await self.repository.list_expenses(self.user_id)
+            return {
+                "status": "success",
+                "data": [
+                    {
+                        "id": e.id,
+                        "description": e.description,
+                        "amount": float(e.amount),
+                        "category_id": e.category_id,
+                        "budget_id": e.budget_id,
+                        "date_spent": e.date_spent.isoformat() if e.date_spent else None,
+                    } for e in expenses
+                ]
+            }
+
+        return StructuredTool.from_function(
+            coroutine=list_expenses,
+            name="list_expenses",
+            description="Get a list of all expenses for the current user"
+        )
 
     def expense_create_tools(self) -> list:
         """Create all tools with injected dependencies."""
@@ -224,4 +239,5 @@ class ExpenseToolFactory:
             self.create_get_category_id_tool(),
             self.create_get_budget_id_tool(),
             self.create_create_expense_tool(),
+            self.create_list_expenses_tool()
         ]

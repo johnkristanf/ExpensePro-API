@@ -42,3 +42,8 @@ class ExpenseRepository:
         await self.session.commit()
         await self.session.refresh(expense)
         return expense
+
+    async def list_expenses(self, user_id: int):
+        stmt = select(Expense).where(Expense.user_id == user_id)
+        result = await self.session.execute(stmt)
+        return result.scalars().all()
