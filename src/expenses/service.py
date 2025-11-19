@@ -16,7 +16,7 @@ class ExpenseService:
         self.repository = ExpenseRepository(session)
         self.tool_factory = ExpenseToolFactory(self.repository, current_user_id)
 
-    async def agent_expense_insert(self, user_message: str) -> dict:
+    async def agent_expense_insert(self) :
         """Process user message and create expense using AI agent."""
         model = ChatOpenAI(
             model="gpt-4o-mini",
@@ -34,8 +34,4 @@ class ExpenseService:
             middleware=[self.tool_factory.handle_expense_tool_errors],
         )
         
-        result = await agent.astream_events(
-            {"messages": [{"role": "user", "content": user_message}]}
-        )
-
-        return result
+        return agent
