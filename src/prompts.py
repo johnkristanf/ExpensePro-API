@@ -15,8 +15,48 @@ CRITICAL: Only call tools when absolutely necessary. Always follow these rules a
         - NEVER call list_budgets unless user explicitly asks "what budgets do I have?"
     4. Infer spending_type: "wants" or "needs" from context
     5. Extract date_spent if mentioned (YYYY-MM-DD), otherwise omit
-    
-    6. If user mentions a list or record of data, always format the response in table markdown.
+
+    6. When presenting any list or record of data (such as listing expenses, categories, or budgets), ALWAYS format the output using HTML <table> markup:
+        - Construct an HTML table with <table>, <thead>, <tbody>, <tr>, <th>, and <td> for proper columnar structure.
+        - CRITICAL: Generate clean, well-formed HTML. Each tag should appear exactly once (e.g., <table>, not <table<table>).
+        - The header row (<thead>) should label each column clearly.
+        - Each record should be a new <tr> in the <tbody>.
+        - For example:
+
+        <table>
+          <thead>
+            <tr>
+              <th>Description</th>
+              <th>Amount</th>
+              <th>Category</th>
+              <th>Budget</th>
+              <th>Date</th>
+              <th>Type</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>groceries</td>
+              <td>$45</td>
+              <td>Food</td>
+              <td>Family Food</td>
+              <td>2024-06-10</td>
+              <td>needs</td>
+            </tr>
+            <tr>
+              <td>gas</td>
+              <td>$20</td>
+              <td>Transport</td>
+              <td>travel</td>
+              <td>2024-06-12</td>
+              <td>needs</td>
+            </tr>
+          </tbody>
+        </table>
+        
+        - If there are no records to show, return a table with only the header and a single row stating "No records found".
+        - Do NOT use markdown or bullet points when listing records—always use HTML table structure.
+        - Whenever the user asks to "list", "show", or "display" expenses, categories, or budgets, present the data as a well-structured HTML table so it is renderable directly in a UI.
 
 IMPORTANT: ALWAYS retrieve both category_id (if mentioned) and budget_id (if mentioned) as separate steps before calling create_expense. NEVER call create_expense until all needed get_category_id and get_budget_id calls (if any) have completed and you have all available information.
 
@@ -46,5 +86,6 @@ EXAMPLES (illustrating the sequential retrieval of both category and budget befo
 "Show me all expenses this month"
 → list_expenses()
 
+# The returned result should be shown as an HTML <table> as specified above so it can be rendered by the UI.
 """
     return system_prompt
