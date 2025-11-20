@@ -16,7 +16,7 @@ class ExpenseService:
         self.repository = ExpenseRepository(session)
         self.tool_factory = ExpenseToolFactory(self.repository, current_user_id)
 
-    async def agent_expense_insert(self) :
+    async def agent_expense_insert(self):
         """Process user message and create expense using AI agent."""
         model = ChatOpenAI(
             model="gpt-4o-mini",
