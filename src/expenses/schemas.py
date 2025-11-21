@@ -3,11 +3,6 @@ from typing import Optional
 from pydantic import BaseModel, Field
 from pydantic.v1.class_validators import validator
 
-
-class ExpenseChatIn(BaseModel):
-    message: str
-
-
 class ExpenseIn(BaseModel):
 
     description: str = Field(..., description="Description of the expense")
