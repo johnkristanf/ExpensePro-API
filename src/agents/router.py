@@ -9,12 +9,12 @@ from src.agents.schemas import AgentChatIn
 from src.agents.agent import Agent
 
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
 agent_router = APIRouter()
+
 
 @agent_router.post("/chat", status_code=201)
 async def agent_chat(
@@ -22,32 +22,34 @@ async def agent_chat(
     agent: Agent = Depends(get_agent),
 ):
     loaded_agent = agent.load_agent()
+    MAX_TOOL_DEPTH = 10
 
     async def stream():
+        tool_stack = []
+        tool_counter = {}
+
         async for event in loaded_agent.astream_events(
             {"messages": [{"role": "user", "content": payload.message}]},
             version="v2",
         ):
-            print(f"EVENT DATA: {event}")
-            # -----------------------------
-            # LOG TOOL START
-            # -----------------------------
             if event["event"] == "on_tool_start":
                 tool = event["name"]
-                # print(f"EVENT START TOOL DATA : {event['data']}")
-                # logger.info("🔧 TOOL START\nTool: %s\nArgs: %s", tool, json.dumps(tool_result, indent=2, default=str))
+                tool_stack.append(tool)
+                tool_counter[tool] = tool_counter.get(tool, 0) + 1
 
-            # -----------------------------
-            # LOG TOOL END
-            # -----------------------------
+                # Prevent deep recursion or excessive repeated tool invocations
+                if tool_counter[tool] > MAX_TOOL_DEPTH:
+                    yield f"\n❌ TOOL RECURSION ERROR: Tool '{tool}' called too many times, possible infinite loop detected.\n"
+                    break
+
             if event["event"] == "on_tool_end":
                 tool = event["name"]
-                # print(f"EVENT END TOOL DATA : {event['data']}")
-                # logger.info("✅ TOOL END\nTool: %s\nOutput: %s", tool, json.dumps(tool_result, indent=2, default=str))
+                if tool_stack and tool_stack[-1] == tool:
+                    tool_stack.pop()
+                else:
+                    if tool in tool_stack:
+                        tool_stack.remove(tool)
 
-            # -----------------------------
-            # LOG TOOL ERROR
-            # -----------------------------
             if event["event"] == "on_tool_error":
                 tool = event["name"]
                 error = event["data"]["error"]
@@ -55,9 +57,6 @@ async def agent_chat(
                 print(f"Tool: {tool}")
                 print(f"Error: {error}\n")
 
-            # -----------------------------
-            # STREAM MODEL TOKENS
-            # -----------------------------
             if event["event"] == "on_chat_model_stream":
                 chunk = event["data"]["chunk"].content
                 if chunk:
