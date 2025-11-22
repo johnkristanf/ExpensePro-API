@@ -1,4 +1,13 @@
 from fastapi import APIRouter
+from pathlib import Path
+
+
+def load_prompt(*filenames):
+    base_path = Path(__file__).parent / "agents" / "prompts"
+    parts = []
+    for name in filenames:
+        parts.append((base_path / name).read_text())
+    return "\n\n".join(parts)
 
 
 def group(prefix, *routers):
