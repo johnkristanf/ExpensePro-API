@@ -8,16 +8,15 @@ from src.config import settings
 from src.budgets.tools import BudgetsToolFactory
 from src.expenses.tools import ExpenseToolFactory
 from src.categories.tools import CategoriesToolFactory
+from src.utils import load_prompt
 
 
 class Agent:
     """Main service orchestrating the expense insertion workflow."""
 
-    def __init__(self, session: AsyncSession, current_user_id: int):
-        self.current_user_id = current_user_id
-        self.expense_tool_factory = ExpenseToolFactory(session, current_user_id)
-        self.categories_tool_factory = CategoriesToolFactory(session, current_user_id)
-        self.budgets_tool_factory = BudgetsToolFactory(session, current_user_id)
+    def __init__(self, session: AsyncSession, user_id: int):
+        self.session = session
+        self.user_id = user_id
 
     def load_agent(self):
         """Process user message and create expense using AI agent."""
@@ -30,18 +29,27 @@ class Agent:
             streaming=True,
         )
 
+        system_prompt = load_prompt(
+            "base.md",
+            "expense_rules.md",
+            "category_rules.md",
+            "budget_rules.md",
+            "html_rendering.md",
+        )
+        
+        print(f"system_prompt: {system_prompt}")
+
+        tools = (
+            ExpenseToolFactory(self.session, self.user_id).all(),
+            CategoriesToolFactory(self.session, self.user_id).all(),
+            BudgetsToolFactory(self.session, self.user_id).all(),
+        )
+
         agent = create_agent(
             model,
-            system_prompt=SYSTEM_PROMPT,
-            tools=[
-                self.expense_tool_factory.create_create_expense_tool,
-                self.expense_tool_factory.create_list_expenses_tool,
-                
-                self.categories_tool_factory.create_get_category_id_tool,
-                self.budgets_tool_factory.create_get_budget_id_tool
-            ],
+            system_prompt=system_prompt,
+            tools=[tool for group in tools for tool in group],
             middleware=[
-                self.expense_tool_factory.handle_expense_tool_errors,
             ],
         )
 
