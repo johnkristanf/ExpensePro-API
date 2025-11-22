@@ -4,8 +4,8 @@ from datetime import date
 
 
 class BudgetIn(BaseModel):
-    name: str = Field(..., max_length=255)
-    current_amount: Optional[float] = 0
+    name: str
     total_amount: float
     budget_period: date
     user_id: int
+    current_amount: Optional[float] = 0

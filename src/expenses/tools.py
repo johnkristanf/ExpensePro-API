@@ -15,6 +15,12 @@ class ExpenseToolFactory:
     def __init__(self, session: AsyncSession, user_id: int):
         self.repository = ExpenseRepository(session)
         self.user_id = user_id
+        
+    def all(self):
+        return [
+            self.create_expense_tool(),
+            self.list_expenses_tool(),
+        ]
 
     @wrap_tool_call
     async def handle_expense_tool_errors(request, handler):
@@ -27,7 +33,7 @@ class ExpenseToolFactory:
                 tool_call_id=request.tool_call["id"],
             )
 
-    def create_create_expense_tool(self) -> StructuredTool:
+    def create_expense_tool(self) -> StructuredTool:
         """Create create_expense tool with injected dependencies."""
 
         async def create_expense(
@@ -96,7 +102,7 @@ class ExpenseToolFactory:
             description="Create a new expense record in the database",
         )
 
-    def create_list_expenses_tool(self):
+    def list_expenses_tool(self):
         """Create the list_expenses tool for the agent."""
 
         async def list_expenses():
