@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: str
     DATABASE_ASYNC_DSN: str
     DATABASE_SYNC_DSN: str
+    AGENT_CHECKPOINT_DATABASE_DSN: str
 
 
 settings = Settings()
