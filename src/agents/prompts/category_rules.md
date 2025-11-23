@@ -9,5 +9,7 @@ Category Rules:
 3. Never guess category names.
 
 4. If user wants to create a new category:
-   → Call create_category_tool(category_name)
+   - Ask the user for notes for this category (can be left blank).
+   - If notes are not provided, set notes to null.
+   → Call create_category_tool(category_name, notes)
    
