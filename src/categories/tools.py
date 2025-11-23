@@ -14,10 +14,7 @@ class CategoriesToolFactory:
         self.user_id = user_id
 
     def all(self):
-        return [
-            self.get_category_id_tool(),
-            self.create_category_tool()
-        ]
+        return [self.get_category_id_tool(), self.create_category_tool()]
 
     def create_category_tool(self) -> StructuredTool:
         """Create create_category tool with injected dependencies."""
@@ -34,14 +31,9 @@ class CategoriesToolFactory:
             Returns:
                 Dictionary with the created category details
             """
-            category_data = CategoryIn(
-                name=name,
-                notes=notes,
-            )
+            category_data = CategoryIn(name=name, notes=notes, user_id=self.user_id)
 
-            category = await self.repository.create_category(
-                category_data, self.user_id
-            )
+            category = await self.repository.create_category(category_data)
 
             return {
                 "status": "success",

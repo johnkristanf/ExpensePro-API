@@ -16,8 +16,8 @@ class CategoryRepository:
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
 
-    async def create_category(self, category_data: CategoryIn, user_id: int):
-        category = Category(**category_data.model_dump(), user_id=user_id)
+    async def create_category(self, category_data: CategoryIn):
+        category = Category(**category_data.model_dump())
         self.session.add(category)
         await self.session.commit()
         await self.session.refresh(category)

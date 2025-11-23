@@ -16,7 +16,7 @@ class BudgetsToolFactory:
     def all(self):
         return [
             self.get_budget_id_tool(),
-            self.create_budget_tool
+            self.create_budget_tool()
         ]
 
     def create_budget_tool(self) -> StructuredTool:
@@ -44,9 +44,10 @@ class BudgetsToolFactory:
                 total_amount=total_amount,
                 current_amount=current_amount,
                 budget_period=budget_period,
+                user_id=self.user_id
             )
 
-            budget = await self.repository.create_budget(budget_data, self.user_id)
+            budget = await self.repository.create_budget(budget_data)
 
             return {
                 "status": "success",

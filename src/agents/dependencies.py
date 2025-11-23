@@ -7,7 +7,7 @@ from src.agents.agent import Agent
 
 def get_agent(
     session: AsyncSession = Depends(Database.get_async_session),
-    current_user: dict = Depends(lambda: {"id": 1, "name": "John Kristan"}),
+    user: dict = Depends(lambda: {"id": 1, "name": "John Kristan"}),
 ):
     """FastAPI dependency that provides an Agent instance."""
-    return Agent(session, current_user["id"])
+    return Agent(session, user["id"])
