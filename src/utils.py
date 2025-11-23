@@ -1,5 +1,11 @@
 from fastapi import APIRouter
 from pathlib import Path
+from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
+from src.config import settings
+
+def get_checkpointer_instance() -> AsyncPostgresSaver:
+    checkpointer = AsyncPostgresSaver.from_conn_string(settings.AGENT_CHECKPOINT_DATABASE_DSN)
+    return checkpointer
 
 
 def load_prompt(*filenames):
