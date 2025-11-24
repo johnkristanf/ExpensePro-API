@@ -30,7 +30,7 @@ async def agent_chat(
         tool_counter = {}
 
         async for event in loaded_agent.astream_events(
-            {"messages": [{"role": "user", "content": payload.message}]},
+            {"messages": [HumanMessage(content=payload.message)]},
             version="v2",
         ):
             if event["event"] == "on_tool_start":
