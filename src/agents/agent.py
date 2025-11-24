@@ -1,8 +1,6 @@
 from langchain.agents import create_agent
 from langchain_openai import ChatOpenAI
-
-from langgraph.checkpoint.postgres import PostgresSaver
-from langgraph.store.postgres import PostgresStore
+from langgraph.checkpoint.memory import InMemorySaver
 
 from sqlalchemy.ext.asyncio.session import AsyncSession
 
@@ -46,20 +44,12 @@ class Agent:
             *BudgetsToolFactory(self.session, self.user_id).all(),
         ]
         
-        checkpointer = PostgresSaver(
-            conn="postgresql://postgres:admin123@172.17.0.2:5432/expensepro"
-        )
-        store = PostgresStore(
-            conn="postgresql://postgres:admin123@172.17.0.2:5432/expensepro"
-        )
-
         agent = create_agent(
             model,
             system_prompt=system_prompt,
             tools=tools,
-            # middleware=[],
-            # checkpointer=checkpointer,
+            checkpointer=InMemorySaver(),
+            middleware=[],
         )
 
-        agent_with_memory = agent.compile(checkpointer=checkpointer, store=store)
-        return agent_with_memory
+        return agent
