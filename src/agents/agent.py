@@ -1,7 +1,8 @@
-from langchain.agents import create_agent
+from langchain.agents import AgentState, create_agent
 from langchain_openai import ChatOpenAI
 from langgraph.checkpoint.memory import InMemorySaver
 
+from langgraph.graph.state import CompiledStateGraph
 from sqlalchemy.ext.asyncio.session import AsyncSession
 
 from src.config import settings
@@ -19,7 +20,7 @@ class Agent:
         self.session = session
         self.user_id = user_id
 
-    async def load_agent(self):
+    def load_agent(self):
         """Process user message and process expense-related operations using AI agent."""
         model = ChatOpenAI(
             model="gpt-4o-mini",
@@ -43,13 +44,26 @@ class Agent:
             *CategoriesToolFactory(self.session, self.user_id).all(),
             *BudgetsToolFactory(self.session, self.user_id).all(),
         ]
-        
+
+        class ExpenseProAgentState(AgentState):
+            # ✅ Track extraction progress
+            expense_extraction: dict  # What's been extracted: {amount, description, category_id, etc}
+            pending_fields: list      # What's still needed: ["category_id", "budget_id"]
+            current_step: str         # Workflow step: "gathering", "confirming", "creating"
+            
+            # Context (loaded once, persisted)
+            budget_context: dict
+            categories_context: dict
+            extracted_budget_id: int | None
+            extracted_category_id: int | None
+            
+            
         agent = create_agent(
             model,
             system_prompt=system_prompt,
             tools=tools,
             checkpointer=InMemorySaver(),
-            middleware=[],
+            state_schema=ExpenseProAgentState,
         )
 
         return agent

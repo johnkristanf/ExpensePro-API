@@ -29,9 +29,20 @@ async def agent_chat(
         tool_stack = []
         tool_counter = {}
 
+        initial_state = {
+            "messages": [HumanMessage(content=payload.message)],
+            "expense_extraction": {},
+            "pending_fields": ["description", "amount", "category_id", "budget_id"],
+            "current_step": "gathering_expense",
+            "budget_context": {},
+            "categories_context": {},
+            "extracted_budget_id": None,
+            "extracted_category_id": None,
+        }
+        config = {"configurable": {"thread_id": f"user_{agent.user_id}_session"}}
+
         async for event in loaded_agent.astream_events(
-            {"messages": [HumanMessage(content=payload.message)]},
-            version="v2",
+            initial_state, config, version="v2"
         ):
             if event["event"] == "on_tool_start":
                 tool = event["name"]
